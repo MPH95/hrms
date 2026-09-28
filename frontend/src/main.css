@@ -28,3 +28,39 @@ body {
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
 }
+
+/* Desktop: keep the phone layout, but center a wide column instead of a
+   384px strip stuck to the left. Phones stay full width. */
+@media (min-width: 640px) {
+	ion-app {
+		background: #e7e9ee;
+	}
+
+	ion-header,
+	ion-header.app-shell-header {
+		--background: #e7e9ee;
+		background: #e7e9ee;
+	}
+
+	ion-content,
+	ion-content.app-shell-content {
+		--background: #e7e9ee;
+	}
+
+	/* Center against the window, not the scrollport. ion-content's scrollbar
+	   otherwise shifts the body a few pixels left of the header and tab bar. */
+	ion-content::part(scroll) {
+		overflow-x: hidden;
+	}
+
+	.app-shell,
+	ion-tab-bar.app-shell {
+		box-sizing: border-box;
+		width: min(72rem, 100vw);
+		max-width: 72rem;
+		margin-left: max(0px, calc((100vw - 72rem) / 2));
+		margin-right: 0;
+		background: #fff;
+		box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06);
+	}
+}

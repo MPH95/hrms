@@ -1,12 +1,12 @@
 <template>
 	<ion-page>
-		<ion-header class="ion-no-border">
-			<div class="w-full sm:w-96">
+		<ion-header class="ion-no-border app-shell-header">
+			<div class="w-full app-shell">
 				<div class="flex flex-col bg-white shadow-sm p-4">
 					<div class="flex flex-row justify-between items-center">
 						<div class="flex flex-row items-center gap-2">
 							<h2 class="text-xl font-bold text-gray-900">
-								{{ props.pageTitle || __("Frappe HR") }}
+								{{ props.pageTitle || __("Movaria HR") }}
 							</h2>
 						</div>
 						<div class="flex flex-row items-center gap-3 ml-auto">
@@ -40,8 +40,8 @@
 			</div>
 		</ion-header>
 
-		<ion-content class="ion-no-padding">
-			<div class="flex flex-col h-screen w-screen sm:w-96">
+		<ion-content class="ion-no-padding app-shell-content">
+			<div class="flex flex-col min-h-full w-full app-shell">
 				<slot name="body"></slot>
 			</div>
 		</ion-content>

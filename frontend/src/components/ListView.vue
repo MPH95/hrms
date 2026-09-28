@@ -1,6 +1,6 @@
 <template>
-	<ion-header class="ion-no-border">
-		<div class="w-full sm:w-96">
+	<ion-header class="ion-no-border app-shell-header">
+		<div class="w-full app-shell">
 			<div
 				class="flex flex-row bg-white shadow-sm py-4 px-3 items-center justify-between border-b"
 			>
@@ -22,6 +22,7 @@
 								: '',
 						]"
 					/>
+					<slot name="actions" />
 					<router-link
 						v-if="createPermission?.data?.has_permission && props.doctype != 'Employee Checkin'"
 						:to="{ name: formViewRoute }"
@@ -39,13 +40,13 @@
 		</div>
 	</ion-header>
 
-	<ion-content>
+	<ion-content class="app-shell-content">
 		<ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
 			<ion-refresher-content></ion-refresher-content>
 		</ion-refresher>
 
 		<div
-			class="flex flex-col items-center mb-7 p-4 h-full w-full sm:w-96 overflow-y-auto"
+			class="flex flex-col items-center mb-7 p-4 h-full w-full app-shell overflow-y-auto"
 			ref="scrollContainer"
 			@scroll="() => handleScroll()"
 		>
@@ -65,6 +66,7 @@
 						class="p-3.5 items-center justify-between border-b cursor-pointer"
 						v-for="link in documents.data"
 						:key="link.name"
+						@click="props.doctype === 'Employee Checkin' && handleCheckinClick(link)"
 					>
 						<component
 							v-if="props.doctype === 'Employee Checkin'"
@@ -72,7 +74,6 @@
 							:doc="link"
 							:isTeamRequest="isTeamRequest"
 							:workflowStateField="workflowStateField"
-							@click="openRequestModal(link)"
 						/>
 						<router-link
 							v-else
@@ -185,6 +186,10 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
+	onCheckinClick: {
+		type: Function,
+		default: null,
+	},
 })
 
 const getButtonKey = (tab) => tab?.key ?? tab
@@ -289,6 +294,14 @@ const createPermission = createResource({
 })
 
 // helper functions
+function handleCheckinClick(request) {
+	if (props.onCheckinClick) {
+		props.onCheckinClick(request)
+		return
+	}
+	openRequestModal(request)
+}
+
 const openRequestModal = async (request) => {
 	selectedRequest.value = request
 	selectedRequest.value.doctype = "Employee Checkin"
@@ -402,4 +415,6 @@ onMounted(async () => {
 
 	useListUpdate(socket, props.doctype, () => fetchDocumentList())
 })
+
+defineExpose({ reload: () => fetchDocumentList() })
 </script>

@@ -52,6 +52,17 @@ const routes = [
 		path: "/employee-checkins",
 		component: () => import("@/views/attendance/EmployeeCheckinList.vue"),
 	},
+	{
+		name: "WorkdayListView",
+		path: "/workdays",
+		component: () => import("@/views/attendance/WorkdayList.vue"),
+	},
+	{
+		name: "WorkdayDayView",
+		path: "/workdays/:date",
+		props: true,
+		component: () => import("@/views/attendance/WorkdayDay.vue"),
+	},
 ]
 
 export default routes
