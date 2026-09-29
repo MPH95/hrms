@@ -1,11 +1,15 @@
 <template>
 	<BaseLayout>
 		<template #body>
-			<div class="flex flex-col items-center my-7 p-4 gap-7">
-				<CheckInPanel />
-				<HoursSummary />
-				<QuickLinks :items="quickLinks" :title="__('Quick Links')" />
-				<RequestPanel />
+			<div class="grid grid-cols-1 lg:grid-cols-2 lg:items-start my-7 p-4 lg:px-8 gap-7 lg:gap-x-10">
+				<div class="flex flex-col items-center gap-7 min-w-0">
+					<CheckInPanel />
+					<HoursSummary />
+				</div>
+				<div class="flex flex-col items-center gap-7 min-w-0">
+					<QuickLinks :items="quickLinks" :title="__('Quick Links')" />
+					<RequestPanel />
+				</div>
 			</div>
 		</template>
 	</BaseLayout>
@@ -25,10 +29,16 @@ import LeaveIcon from "@/components/icons/LeaveIcon.vue"
 import ExpenseIcon from "@/components/icons/ExpenseIcon.vue"
 import EmployeeAdvanceIcon from "@/components/icons/EmployeeAdvanceIcon.vue"
 import SalaryIcon from "@/components/icons/SalaryIcon.vue"
+import TeamIcon from "@/components/icons/TeamIcon.vue"
 
 const __ = inject("$translate")
 
 const quickLinks = [
+	{
+		icon: markRaw(TeamIcon),
+		title: __("Team Calendar"),
+		route: "TeamCalendarView",
+	},
 	{
 		icon: markRaw(AttendanceIcon),
 		title: __("Request Attendance"),

@@ -18,11 +18,13 @@
 import { IonPage, IonContent } from "@ionic/vue"
 import { createResource } from "frappe-ui"
 import { ref, watch, inject } from "vue"
+import { useRoute } from "vue-router"
 
 import FormView from "@/components/FormView.vue"
 
 const employee = inject("$employee")
 const __ = inject("$translate")
+const route = useRoute()
 
 const props = defineProps({
 	id: {
@@ -45,7 +47,19 @@ const formFields = createResource({
 			(field) => !["employee", "employee_name", "status", "company"].includes(field.fieldname)
 		)
 	},
+	onSuccess() {
+		applyRouteQuery()
+	},
 })
+
+function applyRouteQuery() {
+	if (props.id) return
+	const fromDate = route.query.from_date
+	const toDate = route.query.to_date || fromDate
+	if (fromDate) attendanceRequest.value.from_date = String(fromDate)
+	if (toDate) attendanceRequest.value.to_date = String(toDate)
+	if (route.query.reason) attendanceRequest.value.reason = String(route.query.reason)
+}
 
 // form scripts
 watch(

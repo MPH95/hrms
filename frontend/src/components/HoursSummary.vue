@@ -42,6 +42,16 @@
 				</div>
 			</div>
 		</div>
+		<div class="flex items-center justify-between gap-3 w-full border-t pt-3">
+			<div class="flex items-center gap-2 text-sm font-medium text-gray-900">
+				<FeatherIcon name="calendar" class="h-4 w-4" />
+				{{ __("Open workday calendar") }}
+			</div>
+			<div class="flex items-center gap-1 text-xs text-gray-500">
+				<span class="hidden sm:inline">{{ __("Fix days, plan vacation & home office") }}</span>
+				<FeatherIcon name="chevron-right" class="h-4 w-4" />
+			</div>
+		</div>
 	</button>
 </template>
 
@@ -49,7 +59,7 @@
 import { computed, inject } from "vue"
 import { useRouter } from "vue-router"
 import { onIonViewWillEnter } from "@ionic/vue"
-import { createResource } from "frappe-ui"
+import { createResource, FeatherIcon } from "frappe-ui"
 
 const __ = inject("$translate")
 const dayjs = inject("$dayjs")

@@ -19,11 +19,13 @@
 import { IonPage, IonContent } from "@ionic/vue"
 import { createResource } from "frappe-ui"
 import { ref, watch, inject, nextTick } from "vue"
+import { useRoute } from "vue-router"
 
 import FormView from "@/components/FormView.vue"
 
 const dayjs = inject("$dayjs")
 const __ = inject("$translate")
+const route = useRoute()
 const today = dayjs().format("YYYY-MM-DD")
 
 const props = defineProps({
@@ -72,6 +74,7 @@ const formFields = createResource({
 		})
 	},
 	onSuccess(_data) {
+		applyRouteDates()
 		leaveApprovalDetails.reload()
 		leaveTypes.reload()
 	},
@@ -94,6 +97,7 @@ const leaveTypes = createResource({
 	},
 	onSuccess(data) {
 		setLeaveTypes(data)
+		applyRouteDates()
 	},
 })
 
@@ -300,6 +304,16 @@ function areValuesSet() {
 		leaveApplication.value.to_date &&
 		leaveApplication.value.leave_type
 	)
+}
+
+function applyRouteDates() {
+	if (props.id) return
+	const fromDate = route.query.from_date
+	const toDate = route.query.to_date || fromDate
+	const leaveType = route.query.leave_type
+	if (fromDate) leaveApplication.value.from_date = String(fromDate)
+	if (toDate) leaveApplication.value.to_date = String(toDate)
+	if (leaveType) leaveApplication.value.leave_type = String(leaveType)
 }
 
 function validateForm() {
