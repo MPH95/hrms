@@ -4,7 +4,33 @@
 		class="flex flex-col gap-4 w-full bg-white rounded p-4 text-left"
 		@click="router.push({ name: 'WorkdayListView' })"
 	>
-		<div class="flex items-start justify-between gap-3 w-full">
+		<div class="flex flex-col gap-1 w-full">
+			<div class="text-sm font-medium text-gray-500">{{ __("Today") }}</div>
+			<div class="text-2xl font-bold text-gray-900">
+				{{ formatHours(summary.data?.today_actual) }}
+				<span v-if="summary.data?.today_open" class="text-sm font-medium text-gray-500">
+					{{ __("so far") }}
+				</span>
+				<span v-else-if="!Number(summary.data?.today_actual)" class="text-sm font-medium text-gray-500">
+					{{ __("not checked in") }}
+				</span>
+			</div>
+			<div class="text-sm text-gray-500">
+				{{ __("Target {0}", [formatHours(summary.data?.today_target)]) }}
+			</div>
+		</div>
+		<div class="flex items-center justify-between gap-3 w-full border-t pt-3">
+			<div class="text-sm text-gray-500">{{ __("Overtime balance") }}</div>
+			<div
+				v-if="summary.data?.overtime_enabled"
+				class="text-base font-semibold"
+				:class="balanceClass(summary.data.overtime_balance)"
+			>
+				{{ formatBalance(summary.data.overtime_balance) }}
+			</div>
+			<div v-else class="text-sm text-gray-500">{{ __("Not enabled") }}</div>
+		</div>
+		<div class="flex items-start justify-between gap-3 w-full border-t pt-3">
 			<div>
 				<div class="text-sm font-medium text-gray-500">{{ monthLabel }}</div>
 				<div class="text-2xl font-bold text-gray-900 mt-1">
