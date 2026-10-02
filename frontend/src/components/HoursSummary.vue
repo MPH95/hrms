@@ -84,7 +84,6 @@
 <script setup>
 import { computed, inject } from "vue"
 import { useRouter } from "vue-router"
-import { onIonViewWillEnter } from "@ionic/vue"
 import { createResource, FeatherIcon } from "frappe-ui"
 
 const __ = inject("$translate")
@@ -96,7 +95,11 @@ const summary = createResource({
 	auto: true,
 })
 
-onIonViewWillEnter(() => summary.reload())
+function reload() {
+	summary.reload()
+}
+
+defineExpose({ reload })
 
 const monthLabel = computed(() => dayjs().format("MMMM YYYY"))
 

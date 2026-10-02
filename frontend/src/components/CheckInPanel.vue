@@ -85,6 +85,8 @@ import { IonModal, modalController } from "@ionic/vue"
 import { formatTimestamp } from "@/utils/formatters"
 import { settings } from "@/data/settings"
 
+const emit = defineEmits(["changed"])
+
 const DOCTYPE = "Employee Checkin"
 
 const socket = inject("$socket")
@@ -178,6 +180,7 @@ const submitLog = (logType) => {
 				}
 
 				modalController.dismiss()
+				emit("changed")
 				toast({
 					title: __("Success"),
 					text: __("{0} successful!", [actionLabel]),
@@ -208,6 +211,7 @@ onMounted(() => {
 	socket.on("list_update", (data) => {
 		if (data.doctype == DOCTYPE) {
 			checkins.reload()
+			emit("changed")
 		}
 	})
 })

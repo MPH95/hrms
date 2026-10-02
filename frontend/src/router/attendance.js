@@ -68,6 +68,11 @@ const routes = [
 		path: "/team",
 		component: () => import("@/views/attendance/TeamCalendar.vue"),
 	},
+	{
+		name: "ProjectHoursView",
+		path: "/project-hours",
+		component: () => import("@/views/attendance/ProjectHours.vue"),
+	},
 ]
 
 export default routes
