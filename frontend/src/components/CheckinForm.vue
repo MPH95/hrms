@@ -25,6 +25,7 @@
 		<p v-if="error" class="text-sm text-red-600">{{ error }}</p>
 		<Button
 			variant="solid"
+			type="button"
 			class="w-full py-5 text-base"
 			:loading="saveCheckin.loading"
 			@click="save"
@@ -106,15 +107,35 @@ watch(
 
 async function save() {
 	error.value = ""
+	if (!time.value) {
+		error.value = __("Choose a time.")
+		return
+	}
+	const stamp = dayjs(time.value)
+	if (!stamp.isValid()) {
+		error.value = __("Choose a valid time.")
+		return
+	}
 	try {
 		await saveCheckin.submit({
 			name: props.checkin?.name || null,
 			log_type: logType.value,
-			time: dayjs(time.value).format("YYYY-MM-DD HH:mm:ss"),
+			time: stamp.format("YYYY-MM-DD HH:mm:ss"),
 		})
-		emit("saved")
 	} catch (err) {
-		error.value = saveCheckin.error?.messages?.[0] || err?.message || __("Could not save the check-in")
+		error.value = messageFrom(err)
+		return
 	}
+	// The request helper reports a server error without rejecting the promise.
+	// Reloading then looks like the button did nothing.
+	if (saveCheckin.error) {
+		error.value = messageFrom(saveCheckin.error)
+		return
+	}
+	emit("saved")
+}
+
+function messageFrom(err) {
+	return err?.messages?.[0] || err?.message || __("Could not save the check-in")
 }
 </script>

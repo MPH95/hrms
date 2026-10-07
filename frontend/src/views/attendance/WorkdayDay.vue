@@ -400,10 +400,16 @@ async function removePunch() {
 	removeError.value = ""
 	try {
 		await removeCheckin.submit({ name: suggestion.value?.name })
-		onSaved()
 	} catch (err) {
 		removeError.value =
 			removeCheckin.error?.messages?.[0] || err?.message || __("Could not remove the check-in")
+		return
 	}
+	if (removeCheckin.error) {
+		removeError.value =
+			removeCheckin.error?.messages?.[0] || __("Could not remove the check-in")
+		return
+	}
+	onSaved()
 }
 </script>

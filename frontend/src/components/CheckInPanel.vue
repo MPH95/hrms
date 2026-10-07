@@ -70,7 +70,7 @@
 				</div>
 			</template>
 
-			<Button :loading="checkins.insert.loading" variant="solid" class="w-full py-5 text-sm disabled:bg-gray-700" @click="submitLog(nextAction.action)">
+			<Button :loading="saveCheckin.loading" variant="solid" class="w-full py-5 text-sm disabled:bg-gray-700" @click="submitLog(nextAction.action)">
 				{{ __("Confirm {0}", [nextAction.label]) }}
 			</Button>
 		</div>
@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { createListResource, toast, FeatherIcon } from "frappe-ui"
+import { createListResource, createResource, toast, FeatherIcon } from "frappe-ui"
 import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue"
 import { IonModal, modalController } from "@ionic/vue"
 
@@ -107,6 +107,10 @@ const checkins = createListResource({
 	orderBy: "time desc",
 })
 checkins.reload()
+
+const saveCheckin = createResource({
+	url: "hr_addon.api.employee_app.save_my_checkin",
+})
 
 const lastLog = computed(() => {
 	if (checkins.list.loading || !checkins.data) return {}
@@ -158,9 +162,8 @@ const handleEmployeeCheckin = () => {
 const submitLog = (logType) => {
 	const actionLabel = logType === "IN" ? __("Check-in") : __("Check-out")
 
-	checkins.insert.submit(
+	saveCheckin.submit(
 		{
-			employee: employee.data.name,
 			log_type: logType,
 			time: checkinTimestamp.value,
 			latitude: latitude.value,
