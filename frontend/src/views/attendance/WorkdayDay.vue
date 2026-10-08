@@ -211,7 +211,7 @@
 <script setup>
 import { computed, inject, reactive, ref, watch } from "vue"
 import { useRouter } from "vue-router"
-import { IonPage, IonHeader, IonContent } from "@ionic/vue"
+import { IonPage, IonHeader, IonContent, onIonViewWillEnter } from "@ionic/vue"
 import { createResource, FeatherIcon, toast } from "frappe-ui"
 
 import CheckinForm from "@/components/CheckinForm.vue"
@@ -357,11 +357,15 @@ function addAnother() {
 	editing.value = null
 }
 
-function onSaved() {
+onIonViewWillEnter(() => {
+	day.submit({ date: props.date })
+})
+
+async function onSaved() {
 	editing.value = null
 	ignoreSuggestion.value = false
 	removeError.value = ""
-	day.submit({ date: props.date })
+	await day.submit({ date: props.date })
 }
 
 function newRequest(kind) {
@@ -401,15 +405,37 @@ async function removePunch() {
 	try {
 		await removeCheckin.submit({ name: suggestion.value?.name })
 	} catch (err) {
-		removeError.value =
-			removeCheckin.error?.messages?.[0] || err?.message || __("Could not remove the check-in")
-		return
+		const message = problemMessage(removeCheckin.error || err)
+		if (message) {
+			removeError.value = message
+			return
+		}
 	}
 	if (removeCheckin.error) {
-		removeError.value =
-			removeCheckin.error?.messages?.[0] || __("Could not remove the check-in")
-		return
+		const message = problemMessage(removeCheckin.error)
+		if (message) {
+			removeError.value = message
+			return
+		}
 	}
 	onSaved()
+}
+
+function problemMessage(err) {
+	const raw = err?.messages?.length ? err.messages : [err?.message]
+	const problems = raw.filter((message) => message && !isDeskNote(message))
+	if (!problems.length && raw.some((message) => message && isDeskNote(message))) return ""
+	return problems[0] || __("Could not remove the check-in")
+}
+
+function isDeskNote(message) {
+	const text = String(message)
+	return (
+		text.includes("hour variance") ||
+		text.includes("Overtime Ledger Entry") ||
+		/Attendance .+ updated with /.test(text) ||
+		/Attendance .+ created/.test(text) ||
+		text.includes("SAVEPOINT workday_checkin_sync")
+	)
 }
 </script>

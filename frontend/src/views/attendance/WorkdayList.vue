@@ -60,12 +60,19 @@
 						@pointerdown="startDrag(day, $event)"
 						@pointerenter="dragRange(day)"
 						@click="tapDay(day)"
+						@dblclick.stop="openDay(day)"
 					>
 						<div class="flex items-center gap-3">
 							<FeatherIcon v-if="cellIcon(day)" :name="cellIcon(day)" class="h-4 w-4 shrink-0" />
 							<div>
-								<div class="text-base font-medium">
+								<div class="text-base font-medium flex items-center gap-2">
 									{{ dayjs(day.date).format("ddd, D MMM") }}
+									<span
+										v-if="isToday(day)"
+										class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+									>
+										{{ __("Today") }}
+									</span>
 								</div>
 								<div class="text-xs mt-0.5 opacity-80">{{ cellLabel(day) }}</div>
 							</div>
@@ -99,8 +106,16 @@
 								@pointerdown="startDrag(cell, $event)"
 								@pointerenter="dragRange(cell)"
 								@click="tapDay(cell)"
+								@dblclick.stop="openDay(cell)"
 							>
-								<span class="text-sm sm:text-base font-semibold leading-none">
+								<span
+									class="text-sm sm:text-base font-semibold leading-none"
+									:class="
+										isToday(cell)
+											? 'inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-blue-600 text-white'
+											: ''
+									"
+								>
 									{{ dayjs(cell.date).date() }}
 								</span>
 								<FeatherIcon v-if="cellIcon(cell)" :name="cellIcon(cell)" class="h-3.5 w-3.5" />
@@ -118,10 +133,10 @@
 						{{ item.label }}
 					</span>
 				</div>
-				<p class="px-1 text-xs text-gray-500">
+					<p class="px-1 text-xs text-gray-500">
 					{{
 						__(
-							"Tap a day, then the last day (or drag with the mouse) to plan Vacation, Sick or Home office. One day can also be opened to fix check-ins."
+							"Tap a day, then the last day (or drag with the mouse) to plan Vacation, Sick or Home office. Double-click a day to open it and fix check-ins."
 						)
 					}}
 				</p>
@@ -228,6 +243,7 @@ const isLastMonth = computed(() =>
 const weekdayLabels = [1, 2, 3, 4, 5, 6, 0].map((day) => dayjs().day(day).format("dd"))
 
 const legend = computed(() => [
+	{ label: __("Today"), tone: "bg-blue-600" },
 	{ label: __("Worked"), tone: "bg-green-100" },
 	{ label: __("Home office"), tone: REQUEST_STYLES.home.solid },
 	{ label: __("Vacation"), tone: REQUEST_STYLES.leave.solid },
@@ -279,8 +295,15 @@ function shiftMonth(offset) {
 }
 
 function openDay(day) {
+	const now = Date.now()
+	if (lastOpenedDate === day.date && now - lastOpenedAt < 500) return
+	lastOpenedDate = day.date
+	lastOpenedAt = now
 	router.push({ name: "WorkdayDayView", params: { date: day.date } })
 }
+
+let lastOpenedDate = ""
+let lastOpenedAt = 0
 
 const rangeIsSingleDay = computed(() => range.value && range.value.start === range.value.end)
 
@@ -299,7 +322,7 @@ const rangeTitle = computed(() => {
 
 const rangeHint = computed(() => {
 	const total = rangeDays.value.length
-	if (total <= 1) return __("Tap another day to plan a period, or open this day")
+	if (total <= 1) return __("Double-click to open this day, or tap another day to plan a period")
 	return __("{0} days selected · tap a day to start over", [total])
 })
 
@@ -321,8 +344,11 @@ function tapDay(day) {
 	}
 	const current = range.value
 	if (current && current.start === current.end) {
-		if (day.date === current.start) clearRange()
-		else setRange(current.start, day.date)
+		if (day.date === current.start) {
+			openDay(day)
+			return
+		}
+		setRange(current.start, day.date)
 		return
 	}
 	setRange(day.date, day.date)
@@ -380,10 +406,13 @@ function onRequestSaved(request) {
 	else load()
 }
 
+function isToday(day) {
+	return dayjs(day.date).isSame(dayjs(), "day")
+}
+
 function cellClass(day) {
-	const today = dayjs(day.date).isSame(dayjs(), "day") ? "ring-2 ring-gray-900" : ""
 	const request = requestOnDay(day)
-	if (request) return `${requestClass(request.kind, request.pending)} ${today}`
+	if (request) return requestClass(request.kind, request.pending)
 	const tone = {
 		Present: "bg-green-100 text-green-900",
 		"Half Day": "bg-green-50 text-green-800",
@@ -395,7 +424,7 @@ function cellClass(day) {
 		Off: "bg-gray-50 text-gray-600 border border-dashed border-gray-300",
 		"Not Workday": "bg-gray-50 text-gray-600 border border-dashed border-gray-300",
 	}[day.status] || "bg-white text-gray-800 border border-gray-200"
-	return `${tone} ${today}`
+	return tone
 }
 
 function cellIcon(day) {

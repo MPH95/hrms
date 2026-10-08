@@ -127,15 +127,33 @@ async function save() {
 		return
 	}
 	// The request helper reports a server error without rejecting the promise.
-	// Reloading then looks like the button did nothing.
-	if (saveCheckin.error) {
-		error.value = messageFrom(saveCheckin.error)
+	// Desk notes such as "no hour variance" are not a failed save: the punch is
+	// already stored, so the day still has to reload.
+	const problem = saveCheckin.error ? problemMessage(saveCheckin.error) : ""
+	if (problem) {
+		error.value = problem
 		return
 	}
 	emit("saved")
 }
 
-function messageFrom(err) {
-	return err?.messages?.[0] || err?.message || __("Could not save the check-in")
+function problemMessage(err) {
+	const raw = err?.messages?.length ? err.messages : [err?.message]
+	const problems = raw.filter((message) => message && !isDeskNote(message))
+	if (!problems.length && raw.some(Boolean) && raw.every((message) => !message || isDeskNote(message))) {
+		return ""
+	}
+	return problems[0] || __("Could not save the check-in")
+}
+
+function isDeskNote(message) {
+	const text = String(message)
+	return (
+		text.includes("hour variance") ||
+		text.includes("Overtime Ledger Entry") ||
+		/Attendance .+ updated with /.test(text) ||
+		/Attendance .+ created/.test(text) ||
+		text.includes("SAVEPOINT workday_checkin_sync")
+	)
 }
 </script>

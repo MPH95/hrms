@@ -76,14 +76,14 @@
 										:data-today="date.isToday || undefined"
 										class="px-0.5 py-1.5 font-medium border-b text-center"
 										:class="[
-											date.isToday ? 'text-gray-900' : 'text-gray-500',
+											date.isToday ? 'text-blue-700' : 'text-gray-500',
 											date.isWeekend ? 'bg-gray-50' : 'bg-white',
 										]"
 									>
 										<div class="text-[10px] leading-none">{{ date.weekday }}</div>
 										<div
 											class="mt-1 mx-auto h-6 w-6 leading-6 rounded-full text-xs"
-											:class="date.isToday ? 'bg-gray-900 text-white' : ''"
+											:class="date.isToday ? 'bg-blue-600 text-white' : ''"
 										>
 											{{ date.day }}
 										</div>

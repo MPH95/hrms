@@ -159,6 +159,17 @@ const handleEmployeeCheckin = () => {
 	}
 }
 
+function isDeskNote(message) {
+	const text = String(message || "")
+	return (
+		text.includes("hour variance") ||
+		text.includes("Overtime Ledger Entry") ||
+		/Attendance .+ updated with /.test(text) ||
+		/Attendance .+ created/.test(text) ||
+		text.includes("SAVEPOINT workday_checkin_sync")
+	)
+}
+
 const submitLog = (logType) => {
 	const actionLabel = logType === "IN" ? __("Check-in") : __("Check-out")
 
@@ -193,9 +204,15 @@ const submitLog = (logType) => {
 				})
 			},
 			onError(error) {
-				let messages = error.messages?.length ? error.messages : [__("{0} failed!", [actionLabel])]
+				const messages = (error.messages?.length ? error.messages : [error.message]).filter(Boolean)
+				const problems = messages.filter((message) => !isDeskNote(message))
+				if (messages.length && !problems.length) {
+					modalController.dismiss()
+					emit("changed")
+					return
+				}
 
-				for (const message of messages) {
+				for (const message of problems.length ? problems : [__("{0} failed!", [actionLabel])]) {
 					toast({
 						title: __("Error"),
 						text: message || __("{0} failed!", [actionLabel]),
